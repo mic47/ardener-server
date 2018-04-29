@@ -10,8 +10,6 @@ module Types
 import Data.List
 import Data.List.Split
 import Data.Maybe
-import Control.Monad.Trans.RWS.Strict
-import Control.Monad.IO.Class
 import Text.Read.Extra (readEither)
 
 data ArdenerAction 
@@ -21,6 +19,7 @@ data ArdenerAction
 
 data ArdenerMeasurement = ArdenerMeasurement
   { moistureLevel :: Maybe Int
+  , moistureLevel2 :: Maybe Int
   , temperature :: Maybe Int
   , lightIntensity :: Maybe Int
   } 
@@ -52,6 +51,7 @@ instance MessageParser ArdenerAction where
 instance MessageParser ArdenerMeasurement where
   encodeMessage ArdenerMeasurement{..} = mconcat $ intersperse "," $ catMaybes
     [ ("m" ++) . show <$> moistureLevel
+    , ("n" ++) . show <$> moistureLevel2
     , ("t" ++) . show <$> temperature
     , ("l" ++) . show <$> lightIntensity
     ] 
@@ -62,6 +62,9 @@ instance MessageParser ArdenerMeasurement where
         'm':moisture -> do
            moisture' <- readEither moisture
            return partialMeasurement {moistureLevel = Just moisture'}
+        'n':moisture -> do
+           moisture' <- readEither moisture
+           return partialMeasurement {moistureLevel2 = Just moisture'}
         't':temp -> do
            temperature' <- readEither temp
            return partialMeasurement {temperature = Just temperature'}
@@ -70,7 +73,7 @@ instance MessageParser ArdenerMeasurement where
            return partialMeasurement {lightIntensity = Just light'}
         _ -> return partialMeasurement
     )
-    (Right $ ArdenerMeasurement Nothing Nothing Nothing)
+    (Right $ ArdenerMeasurement Nothing Nothing Nothing Nothing)
     $ splitOn "," msg
     
 
