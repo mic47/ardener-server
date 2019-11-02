@@ -92,7 +92,7 @@ handleArdener handle = do
       handleMessage timestamp msg
   handleArdener handle
 
-handleMessage :: Int32 -> ClientMessage -> ArIO ()
+handleMessage :: (Show t) => t -> ClientMessage -> ArIO ()
 handleMessage _ (IdentifySelf newName) = modify $
   \s -> s { ardenerName = Just $ filter (/= '\r') newName }
 handleMessage timestamp (MeasurementLog mLog) = do
